@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google SignIn</title>
+    <meta name="google-signin-client_id" content="917368903350-n8dmot4v7onam3390nejclipvaioe0pd.apps.googleusercontent.com">
+</head>
+
+<body>
+
+    <h1>Google Sigin</h1>
+    <hr>
+    <div class="g-signin2" data-onsuccess="onSignIn"></div>
+
+
+    <a href="#" onclick="signOut();">Sign out</a>
+
+    <script>
+        let url = (window.location.hostname.includes('localhost')) ?
+            'http://localhost:8080/api/auth/google' :
+            'https://coffee-course.herokuapp.com/api/auth/google';
+
+        console.log(url);
+
+        function onSignIn(googleUser) {
+            var profile = googleUser.getBasicProfile();
+            console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+            console.log('Name: ' + profile.getName());
+            console.log('Image URL: ' + profile.getImageUrl());
+            console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+
+            var idtoken = googleUser.getAuthResponse().id_token;
+            const data = {
+                idtoken
+            };
+            fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(result =>
+                    result.json()
+                )
+                .then(data => console.log('response server', data))
+                .catch(console.log);
+            /*
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('POST', '/api/auth/google');
+                        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                        xhr.onload = function() {
+                            console.log('Signed in as: ' + xhr.responseText);
+                        };
+                        xhr.send('idtoken=' + id_token);*/
+        }
+    </script>
+    <script>
+        function signOut() {
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function() {
+                console.log('User signed out.');
+            });
+        }
+    </script>
+</body>
+<script src="https://apis.google.com/js/platform.js" async defer></script>
+
+</html>
